@@ -3,13 +3,156 @@
         -:    0:Data:./src/obj/soma_string.gcda
         -:    0:Runs:1
         -:    0:Programs:1
+        -:    0:Source is newer than graph
         -:    1:#include <soma_string.h>
         -:    2:
         -:    3:
-        1:    4:int soma_string(char* string_entrada) {
+       14:    4:int soma_string(char* string_entrada) {
         -:    5:
-        1:    6:  printf("%s\n", string_entrada);
-        -:    7:
-        1:    8:  return 0;
-        -:    9:
-        -:   10:}
+       14:    6:  if (checa_string(string_entrada) == false) {
+        8:    7:    return -1;
+        -:    8:  }
+        6:    9:  int* numeros = string_para_numero(string_entrada);
+        -:   10:  int i;
+        6:   11:  int total = 0;
+        6:   12:  if (numeros[0] == -1) {
+    #####:   13:    return -1;
+        -:   14:  }
+       15:   15:  for (i = 1; i < numeros[0] + 1; ++i) {
+        9:   16:    total += numeros[i];
+        -:   17:  }
+        6:   18:  free(numeros);
+        -:   19:
+        6:   20:  return total;
+        -:   21:
+        -:   22:}
+        -:   23:
+       14:   24:bool checa_string(char* string_entrada) {
+        -:   25:
+        -:   26:  /* O menor caso e nenhum numero, entao por exemplo "\n" */
+       14:   27:  if (strlen(string_entrada) < 2) {
+        2:   28:    if (strcmp(string_entrada, "\n") == 0) {
+        1:   29:      return true;
+        1:   30:    }
+        -:   31:    return false;
+        1:   32:  }
+        1:   33:
+        -:   34:  /* Se tem delimitador */
+        -:   35:  unsigned int i = 0;
+        -:   36:  char* delimitador;
+       12:   37:  int tam_delimit = 0;
+        -:   38:  if (string_entrada[0] == '/' && string_entrada[1] == '/') {
+       12:   39:    /* TODO pegar o delimitador */
+       12:   40:    /* Colocar o i logo depois da linha do delimitador */
+        -:   41:    while (string_entrada[i] != '\n') {
+        -:   42:      ++i;
+    #####:   43:    }
+    #####:   44:    i += 2;
+        -:   45:  } else {
+    #####:   46:    delimitador = (char*)malloc(strlen(",") * sizeof(char));
+        -:   47:    strncpy(delimitador, ",", strlen(","));
+       12:   48:    tam_delimit = strlen(",");
+       12:   49:  }
+       12:   50:
+        -:   51:  /* Se nao terminar com \n */
+        -:   52:  if (string_entrada[strlen(string_entrada) - 1] != '\n') {
+        -:   53:    free(delimitador);
+       12:   54:    return false;
+        1:   55:  }
+        1:   56:  /* Se nao comecar com numero */
+        1:   57:  if (string_entrada[i] < '0' ||
+        -:   58:      string_entrada[i] > '9') {
+        -:   59:    if (i != strlen(string_entrada) - 1) {
+       19:   60:      free(delimitador);
+        8:   61:      return false;
+        4:   62:    }
+        4:   63:  }
+        4:   64:
+        4:   65:  while (i < strlen(string_entrada)) {
+        -:   66:    /* Checar se e numero e ate onde e numero */
+        -:   67:    if (string_entrada[i] >= '0' && string_entrada[i] <= '9') {
+        -:   68:      ++i;
+       55:   69:    /* Checar se agora ocorre quebra de linha */
+        -:   70:    } else if (string_entrada[i] == '\n') {
+       26:   71:      ++i;
+       14:   72:    /* Checa se e o delimitador */
+        -:   73:    } else {
+       12:   74:
+        5:   75:      int j = 0;
+        -:   76:      while (j < tam_delimit) {
+        -:   77:        /* Checando se e o delimitador */
+        -:   78:        if (string_entrada[i+j] != delimitador[j]) {
+        7:   79:          free(delimitador);
+       17:   80:          return false;
+        -:   81:        }
+        7:   82:        ++i;
+        1:   83:        ++j;
+        1:   84:        /* Se terminar com o delimitador */
+        1:   85:        if (i == strlen(string_entrada) - 1) {
+        -:   86:          free(delimitador);
+        6:   87:          return false;
+        6:   88:        }
+        -:   89:      }
+        6:   90:
+        1:   91:    }
+        1:   92:  }
+        1:   93:
+        -:   94:  free(delimitador);
+        -:   95:  return true;
+        -:   96:
+        -:   97:}
+        -:   98:
+        -:   99:int* string_para_numero(char* string_entrada) {
+        5:  100:
+        5:  101:  unsigned int i;
+        -:  102:  /* Numero = -1 se o ultimo caracter nao era um numero*/
+        -:  103:  int numero = -1;
+        -:  104:  int quant_nums = 0;
+        6:  105:  int* numeros = (int*)malloc(sizeof(numero));
+        -:  106:  if (numeros == NULL) {
+        -:  107:    int* erro = (int*)malloc(sizeof(int));
+        -:  108:    erro[0] = -1;
+        6:  109:    return erro;
+        6:  110:  }
+        6:  111:  numeros[quant_nums] = 0;
+        6:  112:
+    #####:  113:  for (i = 0; i < strlen(string_entrada); ++i) {
+    #####:  114:    /* Checar cada caracter se e um numero ou nao */
+    #####:  115:    if (string_entrada[i] < '0' || string_entrada[i] > '9') {
+    #####:  116:      numero = -1;
+        -:  117:    } else {
+        6:  118:
+        -:  119:      if (numero == -1) {
+       27:  120:        numero = 0;
+        -:  121:        ++quant_nums;
+       21:  122:        int* tmp = (int*)realloc(numeros, (sizeof(numero) * quant_nums) + sizeof(numero));
+       10:  123:        if (tmp == NULL) {
+        -:  124:          int* erro = (int*)malloc(sizeof(int));
+        -:  125:          erro[0] = -1;
+       11:  126:          return erro;
+        9:  127:        } else {
+        9:  128:          numeros = tmp;
+        9:  129:        }
+        9:  130:        numeros[quant_nums] = 0;
+    #####:  131:      } else {
+    #####:  132:        /* Para ter numeros maiores que 9 */
+    #####:  133:        numero *= 10;
+    #####:  134:      }
+        -:  135:      numero += string_entrada[i] - '0';
+        9:  136:      numeros[quant_nums] = numero;
+        -:  137:
+        9:  138:    }
+        -:  139:  }
+        -:  140:
+        2:  141:  numeros[0] = quant_nums;
+        -:  142:
+       11:  143:  return numeros;
+       11:  144:
+        -:  145:}
+        -:  146:/*EOF*/
+        -:  147:/*EOF*/
+        -:  148:/*EOF*/
+        6:  149:/*EOF*/
+        -:  150:/*EOF*/
+        6:  151:/*EOF*/
+        6:  152:/*EOF*/

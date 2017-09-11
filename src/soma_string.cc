@@ -3,6 +3,9 @@
 
 int soma_string(char* string_entrada) {
 
+  if (checa_string(string_entrada) == false) {
+    return -1;
+  }
   int* numeros = string_para_numero(string_entrada);
   int i;
   int total = 0;
@@ -15,6 +18,81 @@ int soma_string(char* string_entrada) {
   free(numeros);
 
   return total;
+
+}
+
+bool checa_string(char* string_entrada) {
+
+  /* O menor caso e nenhum numero, entao por exemplo "\n" */
+  if (strlen(string_entrada) < 2) {
+    if (strcmp(string_entrada, "\n") == 0) {
+      return true;
+    }
+    return false;
+  }
+
+  /* Se tem delimitador */
+  unsigned int i = 0;
+  char* delimitador;
+  int tam_delimit = 0;
+  if (string_entrada[0] == '/' && string_entrada[1] == '/') {
+    /* TODO pegar o delimitador */
+    /* Colocar o i logo depois da linha do delimitador */
+    while (string_entrada[i] != '\n') {
+      ++i;
+    }
+    i += 2;
+  } else {
+    delimitador = (char*)malloc(strlen(",") * sizeof(char));
+    strncpy(delimitador, ",", strlen(","));
+    tam_delimit = strlen(",");
+  }
+
+  /* Se nao terminar com \n */
+  if (string_entrada[strlen(string_entrada) - 1] != '\n') {
+    free(delimitador);
+    return false;
+  }
+  /* Se nao comecar com numero */
+  if (string_entrada[i] < '0' ||
+      string_entrada[i] > '9') {
+    if (i != strlen(string_entrada) - 1) {
+      free(delimitador);
+      return false;
+    }
+  }
+
+  while (i < strlen(string_entrada)) {
+    /* Checar se e numero e ate onde e numero */
+    if (string_entrada[i] >= '0' && string_entrada[i] <= '9') {
+      ++i;
+    /* Checar se agora ocorre quebra de linha */
+    } else if (string_entrada[i] == '\n') {
+      ++i;
+    /* Checa se e o delimitador */
+    } else {
+
+      int j = 0;
+      while (j < tam_delimit) {
+        /* Checando se e o delimitador */
+        if (string_entrada[i+j] != delimitador[j]) {
+          free(delimitador);
+          return false;
+        }
+        ++i;
+        ++j;
+        /* Se terminar com o delimitador */
+        if (i == strlen(string_entrada) - 1) {
+          free(delimitador);
+          return false;
+        }
+      }
+
+    }
+  }
+
+  free(delimitador);
+  return true;
 
 }
 
