@@ -1,0 +1,45 @@
+
+ caracter = /
+
+ caracter = /
+
+ caracter = [
+
+ caracter = @
+
+ caracter = ]
+
+ caracter = [
+
+ caracter = )
+
+ caracter = (
+
+ caracter = ]
+
+ caracter = 
+
+
+ caracter = 1
+
+ caracter = @
+
+ caracter = 2
+
+ caracter = )
+
+ caracter = (
+
+ caracter = 
+
+
+ caracter = 3
+
+ caracter = 
+
+
+ string_entrada = //[@][)(]
+1@2)(
+3
+
+6

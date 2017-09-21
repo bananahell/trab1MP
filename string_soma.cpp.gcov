@@ -1,0 +1,376 @@
+        -:    0:Source:src/string_soma.cpp
+        -:    0:Graph:./src/obj/string_soma.gcno
+        -:    0:Data:./src/obj/string_soma.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:/**
+        -:    2: * @file string_soma.cpp
+        -:    3: * 
+        -:    4: * @brief Arquivo com a função que transforma uma string em números e os soma.
+        -:    5: *
+        -:    6: * @author Pedro Nogueira - 14/0065032
+        -:    7: *
+        -:    8: */
+        -:    9:
+        -:   10:#include <string_soma.hpp>
+        -:   11:
+        -:   12:
+       26:   13:int soma_string(char* string_entrada) {
+        -:   14:
+       26:   15:  if (checa_string(string_entrada) == false) {
+       17:   16:    return -1;
+        -:   17:  }
+        9:   18:  int* numeros = string_para_numero(string_entrada);
+        -:   19:  /* Ocorreu algum problema ao alocar memória dinamicamente */
+        9:   20:  if (numeros == NULL) {
+    #####:   21:    return -1;
+        -:   22:  }
+        -:   23:  int i;
+        9:   24:  int total = 0;
+       26:   25:  for (i = 1; i < numeros[0] + 1; ++i) {
+        -:   26:    /* Se tem algum número maior ou igual a 1000 */
+       17:   27:    if (numeros[i] > 999) {
+        2:   28:      numeros[i] = 0;
+        -:   29:    }
+       17:   30:    total += numeros[i];
+        -:   31:  }
+        9:   32:  free(numeros);
+        -:   33:
+        9:   34:  return total;
+        -:   35:
+        -:   36:}
+        -:   37:
+       26:   38:bool checa_string(char* string_entrada) {
+        -:   39:
+        -:   40:  /* O menor caso é nenhum número, então = "\n" */
+       26:   41:  if (strlen(string_entrada) < 2) {
+        2:   42:    if (strcmp(string_entrada, "\n") == 0) {
+        1:   43:      return true;
+        -:   44:    }
+        1:   45:    return false;
+        -:   46:  }
+        -:   47:
+       24:   48:  unsigned int i = 0;
+        -:   49:  char** delimitadores;
+        -:   50:  int qtd_delimitadores;
+        -:   51:  /* Se tem delimitador */
+       24:   52:  if (string_entrada[0] == '/' && string_entrada[1] == '/') {
+       11:   53:    delimitadores = checa_delimitadores(string_entrada);
+        -:   54:    /* Se deu algum problema com os delimitadores */
+       11:   55:    if (delimitadores == NULL) {
+        8:   56:      return false;
+        -:   57:    }
+        -:   58:    /* Colocar o i assim que começarem os números */
+       61:   59:    while (string_entrada[i] < '0' || string_entrada[i] > '9') {
+       29:   60:      ++i;
+        -:   61:    }
+        -:   62:    /* Achar a quantidade de delimitadores */
+        6:   63:    if (delimitadores[0][0] == '0') {
+        3:   64:      qtd_delimitadores = strlen(delimitadores[0]);
+        -:   65:    }
+        -:   66:  } else {
+        -:   67:    /* Criar delimitador padrão */
+       13:   68:    delimitadores = (char**)malloc(3 * sizeof(char*));
+       13:   69:    if (delimitadores == NULL) {
+    #####:   70:      printf("\n - Ocorreu algum problema");
+    #####:   71:      printf(" na alocação dinâmica de memória! -\n");
+    #####:   72:      return false;
+        -:   73:    }
+       13:   74:    delimitadores[0] = (char*)malloc(2 * sizeof(char));
+       13:   75:    if (delimitadores[0] == NULL) {
+    #####:   76:      printf("\n - Ocorreu algum problema");
+    #####:   77:      printf(" na alocação dinâmica de memória! -\n");
+    #####:   78:      free(delimitadores);
+    #####:   79:      return false;
+        -:   80:    }
+       13:   81:    delimitadores[1] = (char*)malloc(sizeof(char) + 2);
+       13:   82:    if (delimitadores[1] == NULL) {
+    #####:   83:      printf("\n - Ocorreu algum problema");
+    #####:   84:      printf(" na alocação dinâmica de memória! -\n");
+    #####:   85:      free(delimitadores[0]);
+    #####:   86:      free(delimitadores);
+    #####:   87:      return false;
+        -:   88:    }
+       13:   89:    delimitadores[0][0] = ',';
+       13:   90:    delimitadores[0][1] = '\0';
+       13:   91:    delimitadores[1][0] = '0';
+       13:   92:    delimitadores[1][1] = '0';
+       13:   93:    delimitadores[1][2] = '\0';
+       13:   94:    qtd_delimitadores = strlen(delimitadores[1]);
+        -:   95:  }
+        -:   96:
+        -:   97:  /* Se não terminar com \n */
+       16:   98:  if (string_entrada[strlen(string_entrada) - 1] != '\n') {
+        3:   99:    for (i = 0; (int)i < qtd_delimitadores; ++i) {
+        2:  100:      free(delimitadores[i]);
+        -:  101:    }
+        1:  102:    free(delimitadores);
+        1:  103:    return false;
+        -:  104:  }
+        -:  105:  /* Se não começar com número */
+       27:  106:  if (string_entrada[i] < '0' ||
+       12:  107:      string_entrada[i] > '9') {
+        4:  108:    if (i != strlen(string_entrada) - 1) {
+       12:  109:      for (i = 0; (int)i < qtd_delimitadores; ++i) {
+        8:  110:        free(delimitadores[i]);
+        -:  111:      }
+        4:  112:      free(delimitadores);
+        4:  113:      return false;
+        -:  114:    }
+        -:  115:  }
+        -:  116:
+       11:  117:  int quant_nums = 0;
+      125:  118:  while (i < strlen(string_entrada)) {
+        -:  119:    /* Se tiver mais números em uma linha que o especificado */
+       60:  120:    if (quant_nums > 3) {
+        3:  121:      for (i = 0; (int)i < qtd_delimitadores; ++i) {
+        2:  122:        free(delimitadores[i]);
+        -:  123:      }
+        1:  124:      free(delimitadores);
+        1:  125:      return false;
+        -:  126:    }
+        -:  127:    /* Checar se é número e até onde é número */
+       59:  128:    if (string_entrada[i] >= '0' && string_entrada[i] <= '9') {
+       36:  129:      if (i == 0 || string_entrada[i-1] < '0' || string_entrada[i-1] > '9') {
+       24:  130:        ++quant_nums;
+        -:  131:      }
+       36:  132:      ++i;
+        -:  133:    /* Checar se agora ocorre quebra de linha */
+       23:  134:    } else if (string_entrada[i] == '\n') {
+        8:  135:      quant_nums = 0;
+        8:  136:      ++i;
+        -:  137:    /* Checa se é o delimitador */
+        -:  138:    } else {
+        -:  139:
+        -:  140:      int j;
+        -:  141:      int k;
+       15:  142:      bool ja_passou = false;
+       41:  143:      for (k = 0; k < qtd_delimitadores; ++k) {
+       38:  144:        if (ja_passou) {
+       10:  145:          break;
+        -:  146:        }
+       28:  147:        j = 0;
+       64:  148:        while (j < (int)strlen(delimitadores[k])) {
+        -:  149:          /* Checando se é o delimitador */
+       33:  150:          if (string_entrada[i+j] != delimitadores[k][j]) {
+       14:  151:            if (k != qtd_delimitadores - 1) {
+       13:  152:              break;
+        -:  153:            }
+        3:  154:            for (i = 0; (int)i < qtd_delimitadores; ++i) {
+        2:  155:              free(delimitadores[i]);
+        -:  156:            }
+        1:  157:            free(delimitadores);
+        1:  158:            return false;
+        -:  159:          }
+       19:  160:          ++j;
+        -:  161:          /* Se terminar com o delimitador */
+       19:  162:          if (i + j == strlen(string_entrada) - 1) {
+        3:  163:            for (i = 0; (int)i < qtd_delimitadores; ++i) {
+        2:  164:              free(delimitadores[i]);
+        -:  165:            }
+        1:  166:            free(delimitadores);
+        1:  167:            return false;
+        -:  168:          }
+       18:  169:         ja_passou = true;
+        -:  170:        }
+        -:  171:      }
+       13:  172:      i += j;
+        -:  173:
+        -:  174:    }
+        -:  175:  }
+        -:  176:
+       29:  177:  for (i = 0; (int)i < qtd_delimitadores; ++i) {
+       21:  178:    free(delimitadores[i]);
+        -:  179:  }
+        8:  180:  free(delimitadores);
+        8:  181:  return true;
+        -:  182:
+        -:  183:}
+        -:  184:
+       11:  185:char** checa_delimitadores(char* string_entrada) {
+        -:  186:
+       11:  187:  int quant_elem = 0;
+       11:  188:  char** delimitadores = (char**)malloc(sizeof(char*));
+       11:  189:  if (delimitadores == NULL) {
+    #####:  190:    printf("\n - Ocorreu algum problema na alocação dinâmica de memória! -\n");
+    #####:  191:    return NULL;
+        -:  192:  }
+       11:  193:  ++quant_elem;
+       11:  194:  delimitadores[0] = (char*)malloc(3 * sizeof(char));
+       11:  195:  if (delimitadores[0] == NULL) {
+    #####:  196:    printf("\n - Ocorreu algum problema na alocação dinâmica de memória! -\n");
+    #####:  197:    free(delimitadores);
+    #####:  198:    return NULL;
+        -:  199:  }
+       11:  200:  ++quant_elem;
+       11:  201:  delimitadores[0][0] = '0';
+       11:  202:  delimitadores[0][1] = '0';
+       11:  203:  delimitadores[0][2] = '\0';
+       11:  204:  delimitadores[1] = (char*)malloc(2 * sizeof(char));
+       11:  205:  if (delimitadores[1] == NULL) {
+    #####:  206:    printf("\n - Ocorreu algum problema na alocação dinâmica de memória! -\n");
+    #####:  207:    free(delimitadores[0]);
+    #####:  208:    free(delimitadores);
+    #####:  209:    return NULL;
+        -:  210:  }
+       11:  211:  delimitadores[1][0] = '0';
+       11:  212:  delimitadores[1][1] = '\0';
+       11:  213:  unsigned int i = 2;
+        -:  214:  int tamanho_delimit;
+        -:  215:  /* Olhando dentro da lista de delimitadores */
+       59:  216:  while ((string_entrada[i] < '0' || string_entrada[i] > '9')
+       48:  217:         && i != strlen(string_entrada) - 1) {
+        -:  218:    /* Achando um delimitador */
+       21:  219:    if (string_entrada[i] == '[') {
+       14:  220:      ++i;
+        -:  221:      /* Se houver um delimitador vazio na lista */
+       14:  222:      if (string_entrada[i] == ']') {
+        7:  223:        for (i = 0; (int)i < quant_elem; ++i) {
+        5:  224:          free(delimitadores[i]);
+        -:  225:        }
+        2:  226:        free(delimitadores);
+        2:  227:        return NULL;
+        -:  228:      }
+       12:  229:      tamanho_delimit = 0;
+        -:  230:      /* Pegando o que tem entre os colchetes, que é o delimitador */
+       48:  231:      while (string_entrada[i+tamanho_delimit] != ']'
+       30:  232:             && i + tamanho_delimit != strlen(string_entrada) - 1) {
+       18:  233:        ++tamanho_delimit;
+        -:  234:      }
+       12:  235:      char** aux = (char**)realloc(delimitadores,
+       24:  236:                                   (quant_elem + 1) * (sizeof(char*)));
+       12:  237:      if (aux == NULL) {
+    #####:  238:        printf("\n - Ocorreu algum problema");
+    #####:  239:        printf(" na alocação dinâmica de memória! -\n");
+    #####:  240:        for (i = 0; (int)i < quant_elem; ++i) {
+    #####:  241:          free(delimitadores[i]);
+        -:  242:        }
+    #####:  243:        free(delimitadores);
+    #####:  244:        return NULL;
+        -:  245:      }
+       12:  246:      delimitadores = aux;
+       12:  247:      ++quant_elem;
+       12:  248:      char* aux_ind = (char*)realloc(delimitadores[0],
+       24:  249:                                     (quant_elem + 1) * sizeof(char));
+       12:  250:      if (aux_ind == NULL) {
+    #####:  251:        printf("\n - Ocorreu algum problema");
+    #####:  252:        printf(" na alocação dinâmica de memória! -\n");
+    #####:  253:        for (i = 0; (int)i < quant_elem; ++i) {
+    #####:  254:          free(delimitadores[i]);
+        -:  255:        }
+    #####:  256:        free(delimitadores);
+    #####:  257:        return NULL;
+        -:  258:      }
+       12:  259:      delimitadores[0] = aux_ind;
+       12:  260:      delimitadores[0][quant_elem-1] = '0';
+       12:  261:      delimitadores[0][quant_elem] = '\0';
+       12:  262:      delimitadores[quant_elem-1] = (char*)malloc((tamanho_delimit + 1)
+       12:  263:                                                  * sizeof(char));
+       12:  264:      if (delimitadores[quant_elem-1] == NULL) {
+    #####:  265:        printf("\n - Ocorreu algum problema");
+    #####:  266:        printf(" na alocação dinâmica de memória! -\n");
+    #####:  267:        for (i = 0; (int)i < quant_elem; ++i) {
+    #####:  268:          free(delimitadores[i]);
+        -:  269:        }
+    #####:  270:        free(delimitadores);
+    #####:  271:        return NULL;
+        -:  272:      }
+        -:  273:      int m;
+       30:  274:      for (m = 0; m < tamanho_delimit; ++m) {
+       18:  275:        delimitadores[quant_elem-1][m] = string_entrada[i+m];
+        -:  276:      }
+       12:  277:      delimitadores[quant_elem-1][tamanho_delimit] = '\0';
+       12:  278:      i += tamanho_delimit;
+        -:  279:    /* Se achar quebra de linha como se fosse terminar e não termina */
+        7:  280:    } else if (string_entrada[i] == '\n') {
+        4:  281:      if ((string_entrada[i+1] < '0' || string_entrada[i+1] > '9')
+        1:  282:          && string_entrada[i+1] != '\n') {
+        5:  283:        for (i = 0; (int)i < quant_elem; ++i) {
+        4:  284:          free(delimitadores[i]);
+        -:  285:        }
+        1:  286:        free(delimitadores);
+        1:  287:        return NULL;
+        -:  288:      }
+        -:  289:    /* Se achar qualquer coisa fora de colchetes
+        -:  290:         ou que não é quebra de linha */
+        -:  291:    } else {
+       11:  292:      for (i = 0; (int)i < quant_elem; ++i) {
+        8:  293:        free(delimitadores[i]);
+        -:  294:      }
+        3:  295:      free(delimitadores);
+        3:  296:      return NULL;
+        -:  297:    }
+       15:  298:    ++i;
+        -:  299:  }
+        -:  300:
+        -:  301:  /* Se a lista de delimitadores não terminar com \n */
+        5:  302:  if (string_entrada[i-1] != '\n') {
+        8:  303:    for (i = 0; (int)i < quant_elem; ++i) {
+        6:  304:      free(delimitadores[i]);
+        -:  305:    }
+        2:  306:    free(delimitadores);
+        2:  307:    return NULL;
+        -:  308:  }
+        -:  309:  /* Se só tem a lista de delimitadores */
+        3:  310:  if (i == strlen(string_entrada) - 1) {
+    #####:  311:    for (i = 0; (int)i < quant_elem; ++i) {
+    #####:  312:      free(delimitadores[i]);
+        -:  313:    }
+    #####:  314:    free(delimitadores);
+    #####:  315:    return NULL;
+        -:  316:  }
+        -:  317:
+        3:  318:  return delimitadores;
+        -:  319:
+        -:  320:}
+        -:  321:
+        9:  322:int* string_para_numero(char* string_entrada) {
+        -:  323:
+        -:  324:  unsigned int i;
+        -:  325:  /* Número = -1 se o último caracter não era um número */
+        9:  326:  int numero = -1;
+        9:  327:  int quant_nums = 0;
+        9:  328:  int* numeros = (int*)malloc(sizeof(numero));
+        9:  329:  if (numeros == NULL) {
+    #####:  330:    printf("\n - Ocorreu algum problema na alocação dinâmica de memória! -\n");
+    #####:  331:    free(numeros);
+    #####:  332:    return NULL;
+        -:  333:  }
+        9:  334:  numeros[quant_nums] = 0;
+        -:  335:
+       90:  336:  for (i = 0; i < strlen(string_entrada); ++i) {
+        -:  337:    /* Checar cada caracter se é um numero ou nao */
+       81:  338:    if (string_entrada[i] < '0' || string_entrada[i] > '9') {
+       52:  339:      numero = -1;
+        -:  340:    } else {
+        -:  341:
+        -:  342:      /* Começando um novo número inteiro */
+       29:  343:      if (numero == -1) {
+       17:  344:        numero = 0;
+       17:  345:        ++quant_nums;
+       17:  346:        int* tmp = (int*)realloc(numeros, (sizeof(numero) * quant_nums)
+       17:  347:                                            + sizeof(numero));
+       17:  348:        if (tmp == NULL) {
+    #####:  349:          printf("\n - Ocorreu algum problema");
+    #####:  350:          printf(" na alocação dinâmica de memória! -\n");
+    #####:  351:          free(numeros);
+    #####:  352:          return NULL;
+        -:  353:        } else {
+       17:  354:          numeros = tmp;
+        -:  355:        }
+       17:  356:        numeros[quant_nums] = 0;
+        -:  357:      } else {
+        -:  358:        /* Para ter números maiores que 9 */
+       12:  359:        numero *= 10;
+        -:  360:      }
+       29:  361:      numero += string_entrada[i] - '0';
+       29:  362:      numeros[quant_nums] = numero;
+        -:  363:
+        -:  364:    }
+        -:  365:  }
+        -:  366:
+        9:  367:  numeros[0] = quant_nums;
+        -:  368:
+        9:  369:  return numeros;
+        -:  370:
+        -:  371:}

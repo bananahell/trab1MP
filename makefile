@@ -16,13 +16,20 @@ DB=gdb
 CFLAGS=-ansi -Wall -Wextra -I$(IncludeDIR) -pthread -ftest-coverage -fprofile-arcs
 LIBS=-lgtest
 
+
+#
 # Vars:
 # -- ADAPT THIS IN YOUR PROGRAM --
-headers = soma_string.h
-mainObject = testa_soma_string
-objects = soma_string
+headers = string_soma.hpp
+# Main test object
+ mainObject = testa_string_soma
+# Main use object
+# mainObject = testa_soma_string_stdin
+objects = string_soma
+#
 
-# Set of *.h on which the *.cc depend
+
+# Set of *.hpp on which the *.cpp depend
 _DEPS = $(headers)
 DEPS = $(patsubst %,$(IncludeDIR)%,$(_DEPS))
 
@@ -31,7 +38,7 @@ _OBJ = $(mainObject).o $(objects).o
 OBJ = $(patsubst %,$(ObjDIR)%,$(_OBJ))
 
 # Gathers *.o
-$(ObjDIR)%.o: $(CppDIR)%.cc $(DEPS)
+$(ObjDIR)%.o: $(CppDIR)%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS) $(LIBS)
 
 # Creates executable (Linux)
@@ -45,8 +52,8 @@ prepareDIR:
 	mkdir -p $(IncludeDIR)
 	mkdir -p $(CppDIR)
 	mkdir -p $(ObjDIR)
-	mv *.h $(IncludeDIR); true
-	mv *.cc $(CppDIR); true
+	mv *.hpp $(IncludeDIR); true
+	mv *.cpp $(CppDIR); true
 
 # Call for execution
 .PHONY: execute
@@ -73,6 +80,11 @@ clean:
 gcov:
 	gcov $(ObjDIR)$(objects)*.gcno; true
 
+# Call for valgrind coverage
+.PHONY: valgrind
+valgrind:
+	valgrind -v --leak-check=full --show-leak-kinds=all --track-origins=yes --dsymutil=yes ./$(mainObject)
+
 # Call for help with this makefile's commands
 .PHONY: help
 help:
@@ -89,5 +101,6 @@ help:
 	@echo "                   missingIncludeSystem - cppceck can't find the gtest"
 	@echo "                   library)"
 	@echo " make clean......= removes objects from obj directory\n"
+	@echo " make valgrind...= uses valgrind on the project already compiled\n"
 	@echo " For use with program, change variables"
 	@echo " -headers- and -objects- inside makefile\n\n"
